@@ -63,7 +63,7 @@ const imagekitAuth = (req, res) => {
     if (!imagekit) {
       return res.status(503).json({ status: "fail", message: "ImageKit is not configured" });
     }
-    console.log("USING PRIVATE KEY:", process.env.IMAGEKIT_PRIVATEKEY);
+
 
     const publicKey = process.env.IMAGEKIT_PUBLICKEY;
     const urlEndpoint = process.env.IMAGEKIT_URLENDPOINT;

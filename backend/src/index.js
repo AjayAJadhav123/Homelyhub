@@ -18,11 +18,23 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({limit:"100mb",extended:true}));
 app.use(cookieParser());
-const allowedOrigins = [
+const isProd = process.env.NODE_ENV === "production";
+const rawOrigins = [
     process.env.ORIGIN_ACCESS_URL,
-    "http://localhost:5173",
-    "http://10.93.42.63:5173",
+    process.env.FRONTEND_URL,
+    "https://homelyhub-c4md-jk3mviiia-aj386092-hashs-projects.vercel.app"
 ];
+if (!isProd) {
+    rawOrigins.push(
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://10.93.42.63:5173"
+    );
+}
+const allowedOrigins = rawOrigins
+    .filter(Boolean)
+    .map(url => url.endsWith("/") ? url.slice(0, -1) : url);
+
 app.use(cors({
     origin: (origin, callback) => {
         // allow requests with no origin (e.g. mobile apps, curl) or whitelisted

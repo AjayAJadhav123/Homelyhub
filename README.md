@@ -224,12 +224,3 @@ This project is currently available for educational and development purposes.
 
 Add a LICENSE file to the repository if you intend to distribute the project under a specific open-source license.
 
-👨‍💻 Author
-
-Harsh Rautela
-
-GitHub:
-https://github.com/harsh-rautela
-
-Project:
-https://github.com/harsh-rautela/Homely-Hub
