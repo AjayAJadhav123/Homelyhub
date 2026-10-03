@@ -1,0 +1,222 @@
+/* ============================================================
+   HomelyHub Footer — Footer.css
+   4-col desktop → 2-col tablet → 1-col mobile
+   Colors aligned with HomelyHub green theme (#0e8b53)
+   ============================================================ */
+
+.hh-footer {
+  background-color: #F4FAF7;
+  color: #52665D;
+  font-size: 0.9rem;
+  margin-top: 4rem;
+  width: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid #D5E5DD;
+}
+
+/* Inner grid ------------------------------------------------ */
+.hh-footer__inner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 2.5rem 3rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem 2rem;
+  box-sizing: border-box;
+}
+
+/* Column base ----------------------------------------------- */
+.hh-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Brand column ---------------------------------------------- */
+.hh-footer__logo-link {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+}
+
+.hh-footer__logo {
+  height: 3rem;
+  width: auto;
+  object-fit: contain;
+  /* No inversion needed on light background */
+  filter: none;
+}
+
+.hh-footer__tagline {
+  color: #52665D;
+  line-height: 1.65;
+  font-size: 0.875rem;
+  margin: 0 0 1rem;
+}
+
+/* Social icons ---------------------------------------------- */
+.hh-footer__socials {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.hh-footer__social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #E1F3EA;
+  color: #0E9F62;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+}
+
+.hh-footer__social-icon:hover {
+  background: #0E9F62;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Headings -------------------------------------------------- */
+.hh-footer__heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #123B2A;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #0E9F62;
+  width: fit-content;
+}
+
+/* Link lists ------------------------------------------------ */
+.hh-footer__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.hh-footer__link {
+  color: #3F5F52;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+  font-size: 0.875rem;
+  display: inline-block;
+}
+
+.hh-footer__link:hover {
+  color: #0E9F62;
+  padding-left: 0.25rem;
+}
+
+/* Contact list ---------------------------------------------- */
+.hh-footer__list--contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #52665D;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.hh-footer__contact-icon {
+  font-size: 1rem !important;
+  color: #0E9F62;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* Bottom bar ------------------------------------------------ */
+.hh-footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+  border-top: 1px solid #D5E5DD;
+  color: #52665D;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hh-footer__bottom p {
+  margin: 0;
+}
+
+.hh-footer__locale {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.hh-footer__locale:hover {
+  color: #0E9F62;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet: 2 columns ---------------------------------------- */
+@media (max-width: 900px) {
+  .hh-footer__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+
+  /* Brand spans full width on tablet */
+  .hh-footer__col:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile: 1 column ----------------------------------------- */
+@media (max-width: 576px) {
+  .hh-footer__inner {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    padding: 2rem 1.25rem 1.25rem;
+  }
+
+  .hh-footer__col:first-child {
+    grid-column: auto;
+  }
+
+  .hh-footer__bottom {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem 1.25rem;
+    gap: 0.35rem;
+  }
+
+  .hh-footer__socials {
+    gap: 0.6rem;
+  }
+}
+
+/* Very small: 320px ---------------------------------------- */
+@media (max-width: 360px) {
+  .hh-footer__inner {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .hh-footer__heading {
+    font-size: 0.75rem;
+  }
+
+  .hh-footer__link,
+  .hh-footer__list--contact li {
+    font-size: 0.82rem;
+  }
+}
