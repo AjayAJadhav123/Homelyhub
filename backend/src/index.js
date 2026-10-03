@@ -22,7 +22,7 @@ const isProd = process.env.NODE_ENV === "production";
 const rawOrigins = [
     process.env.ORIGIN_ACCESS_URL,
     process.env.FRONTEND_URL,
-    "https://homelyhub-c4md-jk3mviiia-aj386092-hashs-projects.vercel.app"
+    "https://homelyhub-c4md.vercel.app"
 ];
 if (!isProd) {
     rawOrigins.push(
