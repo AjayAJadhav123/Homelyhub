@@ -29,6 +29,7 @@ const PropertyListing = lazy(() => import("./components/propertyListing/Property
 const Accomodation = lazy(() => import("./components/accomodation/Accomodation"));
 const AccomodationForm = lazy(() => import("./components/accomodation/AccomodationForm"));
 const Payment = lazy(() => import("./components/payment/Payment"));
+const PaymentStatus = lazy(() => import("./components/payment/PaymentStatus"));
 const AiTripPlanner = lazy(() => import("./components/aiTripPlanner/AiTripPlanner"));
 const MyBookings = lazy(() => import("./components/myBookings/MyBookings"));
 const BookingDetails = lazy(() => import("./components/myBookings/BookingDetails"));
@@ -104,6 +105,11 @@ function App() {
                   <Route
                     path="payment/:propertyId"
                     element={user ? <Payment /> : <Navigate to="/login" />}
+                  />
+
+                  <Route
+                    path="payment-status"
+                    element={user ? <PaymentStatus /> : <Navigate to="/login" />}
                   />
 
                   <Route path="*" element={<NotFound />} />

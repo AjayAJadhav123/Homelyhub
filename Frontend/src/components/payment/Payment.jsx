@@ -89,9 +89,11 @@ console.log(bookingDetails)
 
       const checkoutOptions = {
         paymentSessionId: payment_session_id,
-        redirectTarget: "_modal",
+        redirectTarget: "_self",   // full-page redirect to Cashfree's hosted page → avoids modal whitelist
       };
 
+      // For redirect mode, checkout() navigates the user to Cashfree and back.
+      // result.redirect will fire; paymentDetails fires only in modal mode.
       cashfree.checkout(checkoutOptions).then(async (result) => {
         if (result.error) {
           console.error("Cashfree payment failed:", result.error);
