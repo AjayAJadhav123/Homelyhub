@@ -49,7 +49,7 @@ const createOrder = async (req, res) => {
             paymentStatus: "PENDING"
         });
 
-        let returnUrl = `${frontendUrl}/payment-status?order_id={order_id}`;
+        let returnUrl = `${frontendUrl}/payment-status?order_id=${order_id}`;
         let notifyUrl = `${backendUrl}/api/v1/rent/user/booking/webhook`;
 
         // Cashfree production strictly requires HTTPS URLs
