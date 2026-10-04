@@ -19,11 +19,10 @@ app.use(express.json({
 app.use(express.urlencoded({limit:"100mb",extended:true}));
 app.use(cookieParser());
 const isProd = process.env.NODE_ENV === "production";
-const rawOrigins = [
-    process.env.ORIGIN_ACCESS_URL,
-    process.env.FRONTEND_URL,
-    "https://homelyhub-c4md.vercel.app"
-];
+const rawOrigins = [];
+if (process.env.ORIGIN_ACCESS_URL) rawOrigins.push(...process.env.ORIGIN_ACCESS_URL.split(','));
+if (process.env.FRONTEND_URL) rawOrigins.push(...process.env.FRONTEND_URL.split(','));
+
 if (!isProd) {
     rawOrigins.push(
         "http://localhost:5173",
@@ -33,13 +32,18 @@ if (!isProd) {
 }
 const allowedOrigins = rawOrigins
     .filter(Boolean)
-    .map(url => url.endsWith("/") ? url.slice(0, -1) : url);
+    .map(url => url.trim().endsWith("/") ? url.trim().slice(0, -1) : url.trim());
 
 app.use(cors({
     origin: (origin, callback) => {
-        // allow requests with no origin (e.g. mobile apps, curl) or whitelisted
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        if (!origin) return callback(null, true);
+
+        // Check exact matches or dynamic Vercel preview deployments securely
+        const isAllowed = allowedOrigins.includes(origin) || 
+                          /^https:\/\/homelyhub(-.*)?\.vercel\.app$/.test(origin);
+                          
+        if (isAllowed) {
+            callback(null, origin); // pass the origin back to reflect it dynamically
         } else {
             callback(new Error(`CORS blocked for origin: ${origin}`));
         }
