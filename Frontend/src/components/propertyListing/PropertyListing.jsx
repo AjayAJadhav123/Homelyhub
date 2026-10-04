@@ -11,6 +11,9 @@ import {getPropertyDetails} from "../../store/PropertyDetails/propertyDetails-ac
 import {useDispatch,useSelector} from "react-redux"
 import { toggleFavorite } from "../../store/Favorite/favorite-action";
 import InquiryModal from "./InquiryModal";
+import PropertyReviews from "./PropertyReviews";
+import { axiosInstance } from "../../utils/axios";
+import { useNavigate } from "react-router-dom";
 import {
   STATIC_PROPERTIES,
   STATIC_PROPERTY_DETAILS,
@@ -18,6 +21,7 @@ import {
 
 const PropertyListing = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [isInquiryModalVisible, setIsInquiryModalVisible] = useState(false);
 
   // STATIC: was `useSelector((state) => state.propertydetails)`.
@@ -38,6 +42,19 @@ const PropertyListing = () => {
   useEffect(() => {
     dispatch(getPropertyDetails(id))
   }, [id,dispatch]);
+
+  const handleStartChat = async () => {
+    if (!isAuthenticated) return;
+    try {
+      await axiosInstance.post("/v1/rent/chat/conversations", { propertyId: id });
+      navigate("/chat");
+    } catch (error) {
+      console.error("Failed to start chat", error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      }
+    }
+  };
 
   if (loading || !propertydetails)
     return (
@@ -120,6 +137,24 @@ const PropertyListing = () => {
             >
               Contact Owner
             </button>
+            <button 
+              className="btn"
+              onClick={handleStartChat}
+              style={{
+                backgroundColor: "white",
+                color: "#ff385c",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                border: "1px solid #ff385c",
+                fontWeight: "600",
+                cursor: isAuthenticated ? "pointer" : "not-allowed",
+                opacity: isAuthenticated ? 1 : 0.6,
+                marginLeft: "10px"
+              }}
+              title={!isAuthenticated ? "Please login to chat with the owner" : ""}
+            >
+              Chat with Owner
+            </button>
           </div>
           <hr></hr>
           <PropertyAmenities amenities={amenities} />
@@ -141,6 +176,9 @@ const PropertyListing = () => {
           <PropertMapInfo address={address} />
         </div>
       </div>
+      
+      <PropertyReviews propertyId={id} />
+      
       <InquiryModal 
         visible={isInquiryModalVisible}
         onClose={() => setIsInquiryModalVisible(false)}

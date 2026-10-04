@@ -60,6 +60,15 @@ class APIFeatures {
       // $all = must have ALL of them, not just one.
       filterQuery["amenities.name"] = { $all: amenitiesArray };
     }
+
+    if (queryObj.bedrooms) {
+      filterQuery.bedrooms = { $gte: Number(queryObj.bedrooms) };
+    }
+
+    if (queryObj.isFurnished !== undefined) {
+      filterQuery.isFurnished = queryObj.isFurnished === 'true';
+    }
+
     // add these rules to the search. Nothing runs yet - mongoose
     // only collects the rules until we await it.
     this.query = this.query.find(filterQuery);

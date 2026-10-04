@@ -21,7 +21,7 @@ export const getLogin = (user)=>async(dispatch)=>{
         dispatch(userAction.getLoginDetails(data?.user))
     } catch(error){
         console.log(error)
-        dispatch(userAction.getError(error.response.data.message))
+        dispatch(userAction.getError(error.response?.data?.message || error.message))
     }
 }
 
@@ -44,7 +44,7 @@ export const updateUser = (updateUser)=> async(dispatch)=>{
         dispatch(userAction.getCurrentUser(data.user))
         return data.user;
     } catch(error){
-        dispatch(userAction.getError(error.response.data.message))
+        dispatch(userAction.getError(error.response?.data?.message || error.message))
         throw error;
     }
 }

@@ -2,6 +2,8 @@ import {Property} from "../Models/propertyModel.js"
 import {APIFeatures} from "../utils/APIFeatures.js"
 import mongoose from "mongoose";
 import imagekit from "../utils/ImagekitIO.js";
+import Favorite from "../Models/favoriteModel.js";
+import { createNotification } from "./notificationController.js";
 
 const getProperties = async (req, res) => {
   try {
@@ -42,7 +44,7 @@ const getProperties = async (req, res) => {
 
 const getProperty = async (req,res)=>{  
     try {
-       const property = await Property.findById(req.params.id);
+       const property = await Property.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }, { new: true });
        if (!property) {
            return res.status(404).json({ status: "fail", message: "Property not found" });
        }
@@ -171,6 +173,35 @@ const updateProperty = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
+
+    // PRICE DROP DETECTION
+    if (price && Number(price) < property.price) {
+      // Find all users who wishlisted (favorited) this property
+      const favorites = await Favorite.find({ property: property._id });
+      for (const fav of favorites) {
+        await createNotification(
+          fav.user,
+          "Price Drop Alert! 📉",
+          `Good news! The price for "${property.propertyName}" dropped from ₹${property.price} to ₹${price}.`,
+          "PRICE_CHANGE"
+        );
+      }
+    }
+
+    // AVAILABILITY DETECTION (if currentBookings was manually reduced by owner)
+    if (req.body.currentBookings && Array.isArray(req.body.currentBookings)) {
+      if (req.body.currentBookings.length < property.currentBookings.length) {
+        const favorites = await Favorite.find({ property: property._id });
+        for (const fav of favorites) {
+          await createNotification(
+            fav.user,
+            "Property Available! 🏠",
+            `A booking was cancelled! "${property.propertyName}" is now available for new dates.`,
+            "SYSTEM"
+          );
+        }
+      }
+    }
 
     res.status(200).json({ status: "success", data: updatedProperty });
   } catch (error) {

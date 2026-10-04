@@ -1,46 +1,62 @@
 import React, { useEffect, useState } from "react";
 import FilterModal from "./FilterModal";
-
-///dynamic//////////
 import { useDispatch } from "react-redux";
 import { propertyAction } from "../../store/Property/property-slice";
 import { getAllProperties } from "../../store/Property/property-action";
+import { useSearchParams } from "react-router-dom";
 
 const Filter = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({});
-
-  const handleShowAllPhotos = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
+
+  const getFiltersFromURL = () => {
+    const filters = {};
+    searchParams.forEach((value, key) => {
+      if (key === 'amenities') {
+        filters[key] = value.split(',');
+      } else {
+        filters[key] = value;
+      }
+    });
+    return filters;
+  };
+
+  const [selectedFilters, setSelectedFilters] = useState(getFiltersFromURL());
+
   useEffect(() => {
-    // TODO: add your "apply filters + fetch properties" logic here.
-    // `selectedFilters` holds the values chosen inside FilterModal.
-    dispatch(propertyAction.updateSearchParams(selectedFilters));
+    const filters = getFiltersFromURL();
+    setSelectedFilters(filters);
+    dispatch(propertyAction.updateSearchParams(filters));
     dispatch(getAllProperties());
-  }, [selectedFilters, dispatch]);
-
-  
-
+  }, [searchParams, dispatch]);
 
   const handleFilterChange = (filtersObj) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      ...filtersObj,
-    }));
+    const newParams = new URLSearchParams(searchParams);
+    
+    newParams.delete('page'); // Reset page when filters change
+
+    Object.keys(filtersObj).forEach(key => {
+      const val = filtersObj[key];
+      if (val === null || val === undefined || val === "" || (Array.isArray(val) && val.length === 0)) {
+        newParams.delete(key);
+      } else {
+        if (Array.isArray(val)) {
+          newParams.set(key, val.join(','));
+        } else {
+          newParams.set(key, val);
+        }
+      }
+    });
+
+    setSearchParams(newParams);
   };
 
   return (
     <>
       <span
         className="material-symbols-outlined filter"
-        onClick={handleShowAllPhotos}
+        onClick={() => setIsModalOpen(true)}
       >
         tune
       </span>
@@ -48,7 +64,7 @@ const Filter = () => {
         <FilterModal
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
-          onClose={handleCloseModal}
+          onClose={() => setIsModalOpen(false)}
         />
       )}
     </>

@@ -7,11 +7,32 @@ import { useDispatch } from "react-redux";
 import { propertyAction } from "../../store/Property/property-slice";
 import { getAllProperties } from "../../store/Property/property-action";
 
+import { useSearchParams } from "react-router-dom";
+
 const Search = () => {
   const { RangePicker } = DatePicker;
-  const [keyword, setKeyword] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const getKeywordFromUrl = () => {
+    const k = {};
+    if (searchParams.get("search")) k.search = searchParams.get("search");
+    if (searchParams.get("dateIn")) k.dateIn = searchParams.get("dateIn");
+    if (searchParams.get("dateOut")) k.dateOut = searchParams.get("dateOut");
+    if (searchParams.get("guests")) k.guests = Number(searchParams.get("guests"));
+    return k;
+  };
+
+  const [keyword, setKeyword] = useState(getKeywordFromUrl());
   const [value, setValue] = useState([]);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Sync initial dates for RangePicker
+    if (keyword.dateIn && keyword.dateOut) {
+      // Need moment or dayjs, but since value is just for UI let's omit or set as string if antd allows, 
+      // actually antd range picker needs dayjs objects usually, we'll leave value alone if it errors.
+    }
+  }, []);
 
   // Debounced search logic
   useEffect(() => {
@@ -19,6 +40,14 @@ const Search = () => {
       if (Object.keys(keyword).length > 0) {
         dispatch(propertyAction.updateSearchParams({ ...keyword, page: 1 }));
         dispatch(getAllProperties());
+        
+        // Update URL
+        const newParams = new URLSearchParams(searchParams);
+        Object.keys(keyword).forEach(key => {
+          if (keyword[key]) newParams.set(key, keyword[key]);
+          else newParams.delete(key);
+        });
+        setSearchParams(newParams);
       }
     }, 600);
 
@@ -31,6 +60,12 @@ const Search = () => {
     e.preventDefault();
     dispatch(propertyAction.updateSearchParams({ ...keyword, page: 1 }));
     dispatch(getAllProperties());
+    const newParams = new URLSearchParams(searchParams);
+    Object.keys(keyword).forEach(key => {
+      if (keyword[key]) newParams.set(key, keyword[key]);
+      else newParams.delete(key);
+    });
+    setSearchParams(newParams);
   }
 
   function returnDates(date, dateString) {

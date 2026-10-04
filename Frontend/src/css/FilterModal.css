@@ -246,3 +246,36 @@
   color: #0a6e41;
   box-shadow: none;
 }
+
+@media (max-width: 768px) {
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  
+  .modal-content {
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    padding: 1.5rem 1rem;
+    animation: slideUp 0.3s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .range-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .range-inputs span {
+    display: none;
+  }
+}

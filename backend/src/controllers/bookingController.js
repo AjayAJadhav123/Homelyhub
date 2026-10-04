@@ -3,6 +3,7 @@ import {Booking} from "../Models/bookingModel.js"
 import cashfree from "../utils/cashfree.js";
 import crypto from "crypto"
 import dotenv from "dotenv" 
+import { createNotification } from "./notificationController.js";
 dotenv.config()
 
 const createOrder = async (req, res) => {
@@ -117,7 +118,7 @@ const verifyPayement = async (req, res) => {
         }
 
             // Add to property currentBookings
-            await Property.findByIdAndUpdate(existingBooking.property, {
+            const prop = await Property.findByIdAndUpdate(existingBooking.property, {
                 $push: {
                     currentBookings: {
                         bookingId: existingBooking._id,
@@ -127,6 +128,13 @@ const verifyPayement = async (req, res) => {
                     }
                 }
             });
+
+            await createNotification(
+                req.user._id,
+                "Booking Confirmed!",
+                `Your booking at ${prop.propertyName} is confirmed.`,
+                "BOOKING_CONFIRMED"
+            );
 
             return res.status(200).json({ success: true, message: "Payment successful", booking: updatedBooking });
         }
@@ -165,7 +173,7 @@ const cashfreeWebhook = async (req, res) => {
                     if (!updatedBooking) return res.status(200).json({ status: "Already Processed" });
 
                     // Add to property currentBookings
-                    await Property.findByIdAndUpdate(existingBooking.property, {
+                    const prop = await Property.findByIdAndUpdate(existingBooking.property, {
                         $push: {
                             currentBookings: {
                                 bookingId: existingBooking._id,
@@ -175,10 +183,25 @@ const cashfreeWebhook = async (req, res) => {
                             }
                         }
                     });
+
+                    await createNotification(
+                        existingBooking.user,
+                        "Booking Confirmed!",
+                        `Your booking at ${prop.propertyName} is confirmed.`,
+                        "BOOKING_CONFIRMED"
+                    );
                 } else if (event.type === "PAYMENT_FAILED_WEBHOOK") {
                     existingBooking.paid = false;
                     existingBooking.paymentStatus = "FAILED";
                     await existingBooking.save();
+
+                    const prop = await Property.findById(existingBooking.property);
+                    await createNotification(
+                        existingBooking.user,
+                        "Payment Failed",
+                        `Your payment for ${prop.propertyName} failed. Please try again.`,
+                        "PAYMENT_FAILED"
+                    );
                 } else if (event.type === "ORDER_PAY_ACTION_WEBHOOK" && event.data?.payment?.payment_status === "USER_DROPPED") {
                     existingBooking.paid = false;
                     existingBooking.paymentStatus = "CANCELLED";

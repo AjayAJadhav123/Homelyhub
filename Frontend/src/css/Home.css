@@ -172,8 +172,8 @@ input::placeholder,
 
 .propertylist {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin: 0 auto;
   margin-top: 2rem;
   width: 95%;
@@ -321,4 +321,56 @@ figure:hover main {
 
 .material-symbols-outlined {
   font-size: 1.2rem;
+}
+
+@media (max-width: 1024px) {
+  .propertylist {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 1rem;
+  }
+  .search_filter {
+    order: 3;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  .searchbar {
+    max-width: 100%;
+  }
+  .propertylist {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .searchbar {
+    flex-direction: column;
+    height: auto;
+    border-radius: 15px;
+    padding: 0.5rem;
+  }
+  .searchbar > * {
+    width: 100%;
+    border-left: none !important;
+    border-bottom: 1px solid #e4e4e4;
+    padding: 0.5rem 0;
+    flex: none !important;
+  }
+  .searchbar > *:last-child {
+    border-bottom: none;
+  }
+  .searchicon {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+  }
+  .propertylist {
+    grid-template-columns: 1fr;
+  }
 }

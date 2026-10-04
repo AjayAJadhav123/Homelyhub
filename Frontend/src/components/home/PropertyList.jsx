@@ -10,8 +10,12 @@ import {useDispatch,useSelector} from "react-redux"
 import {propertyAction} from "../../store/Property/property-slice"
 import {getAllProperties} from "../../store/Property/property-action"
 import { toggleFavorite } from "../../store/Favorite/favorite-action";
+import AiPropertySearch from "./AiPropertySearch";
+import InteractiveMap from "./InteractiveMap";
+import PropertyCompare from "./PropertyCompare";
+import toast from "react-hot-toast";
 
-const Card = ({ id, image, name, address, price, isFavorite, propertyObj }) => {
+const Card = ({ id, image, name, address, price, isFavorite, propertyObj, isCompared, onCompareToggle }) => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
 
@@ -22,6 +26,13 @@ const Card = ({ id, image, name, address, price, isFavorite, propertyObj }) => {
   };
   return (
     <figure className="property" style={{ position: "relative" }}>
+      <label className="compare-checkbox-container">
+        <input 
+          type="checkbox" 
+          checked={isCompared}
+          onChange={() => onCompareToggle(propertyObj)}
+        /> Compare
+      </label>
       <div 
         className={`favorite-btn ${isFavorite ? "active" : ""}`}
         onClick={handleFavoriteClick}
@@ -65,7 +76,15 @@ const Card = ({ id, image, name, address, price, isFavorite, propertyObj }) => {
       <h4>{name}</h4>
       <figcaption>
         <main className="propertydetails">
-          <h5>{name}</h5>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <h5>{name}</h5>
+            {propertyObj?.averageRating > 0 && (
+              <span style={{ display: "flex", alignItems: "center", gap: "2px", fontSize: "0.9rem", color: "#475569" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", color: "#ff385c", fontVariationSettings: "'FILL' 1" }}>star</span>
+                <strong>{propertyObj.averageRating}</strong> ({propertyObj.numberOfReviews})
+              </span>
+            )}
+          </div>
 
           <h6>
             <span className="material-symbols-outlined houseicon">
@@ -90,6 +109,24 @@ const PropertyList = () => {
    const lastPage = Math.ceil(totalProperties / 8);
 
   const propertyListRef = useRef(null);
+
+  const [selectedForCompare, setSelectedForCompare] = useState([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+
+  const handleCompareToggle = (property) => {
+    setSelectedForCompare(prev => {
+      const isSelected = prev.some(p => p._id === property._id);
+      if (isSelected) {
+        return prev.filter(p => p._id !== property._id);
+      } else {
+        if (prev.length >= 4) {
+          toast.error("You can only compare up to 4 properties at a time.");
+          return prev;
+        }
+        return [...prev, property];
+      }
+    });
+  };
 
   useEffect(() => {
     dispatch(getAllProperties())
@@ -117,24 +154,37 @@ const PropertyList = () => {
 
   return (
     <>
+      <AiPropertySearch />
+      
+      {properties.length > 0 && <InteractiveMap properties={properties} />}
+
       {properties.length === 0 ? (
         <p className={"not_found"}>Property not found</p>
       ) : (
-        <div className="propertylist" ref={propertyListRef}>
+        <>
+          <div style={{ maxWidth: "1200px", margin: "1rem auto", padding: "0 1.5rem" }}>
+            <h3 style={{ color: "#1e293b", fontSize: "1.2rem", fontWeight: "600" }}>
+              Showing {totalProperties} {totalProperties === 1 ? 'property' : 'properties'}
+            </h3>
+          </div>
+          <div className="propertylist" ref={propertyListRef}>
           {properties.map((property) => (
             <Card
               key={property._id}
               id={property._id}
-              image={property.images[0].url}
+              image={property.images?.[0]?.url}
               name={property.propertyName}
-              address={`${property.address.city}, ${property.address.state} ${property.address.pincode}`}
+              address={`${property.address?.city}, ${property.address?.state} ${property.address?.pincode}`}
               price={property.price}
               slug={property.slug}
               isFavorite={favorites?.some(fav => fav.property?._id === property._id)}
               propertyObj={property}
+              isCompared={selectedForCompare.some(p => p._id === property._id)}
+              onCompareToggle={handleCompareToggle}
             />
           ))}
         </div>
+        </>
       )}
 
       <div className="pagination">
@@ -154,6 +204,34 @@ const PropertyList = () => {
           <span className="material-symbols-outlined">arrow_forward_ios</span>
         </button>
       </div>
+
+      {selectedForCompare.length > 0 && (
+        <div className="compare-tray">
+          <div className="compare-tray-left">
+            <span><strong>{selectedForCompare.length}</strong> properties selected</span>
+            <div className="compare-tray-thumbnails">
+              {selectedForCompare.map(p => (
+                <img key={p._id} src={p.images[0]?.url} alt={p.propertyName} title={p.propertyName} />
+              ))}
+            </div>
+          </div>
+          <button 
+            className="compare-action-btn"
+            onClick={() => setShowCompareModal(true)}
+            disabled={selectedForCompare.length < 2}
+          >
+            {selectedForCompare.length < 2 ? "Select at least 2 to compare" : "Compare Now"}
+          </button>
+        </div>
+      )}
+
+      {showCompareModal && (
+        <PropertyCompare 
+          selectedProperties={selectedForCompare} 
+          onRemove={(id) => setSelectedForCompare(prev => prev.filter(p => p._id !== id))}
+          onClose={() => setShowCompareModal(false)}
+        />
+      )}
     </>
   );
 };

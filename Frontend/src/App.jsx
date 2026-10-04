@@ -35,6 +35,10 @@ const MyBookings = lazy(() => import("./components/myBookings/MyBookings"));
 const BookingDetails = lazy(() => import("./components/myBookings/BookingDetails"));
 const MyFavorites = lazy(() => import("./components/user/MyFavorites"));
 const MyInquiries = lazy(() => import("./components/user/MyInquiries"));
+const OwnerAnalytics = lazy(() => import("./components/user/OwnerAnalytics/OwnerAnalytics"));
+const AdminAnalytics = lazy(() => import("./components/user/AdminAnalytics/AdminAnalytics"));
+const Chat = lazy(() => import("./components/user/Chat/Chat"));
+
 function App() {
   
  const {user,errors}=useSelector(state=>state.user)
@@ -110,6 +114,21 @@ function App() {
                   <Route
                     path="payment-status"
                     element={user ? <PaymentStatus /> : <Navigate to="/login" />}
+                  />
+                  
+                  <Route
+                    path="owner/analytics"
+                    element={user ? <OwnerAnalytics /> : <Navigate to="/login" />}
+                  />
+
+                  <Route
+                    path="admin/analytics"
+                    element={user ? <AdminAnalytics /> : <Navigate to="/login" />}
+                  />
+
+                  <Route
+                    path="chat"
+                    element={user ? <Chat /> : <Navigate to="/login" />}
                   />
 
                   <Route path="*" element={<NotFound />} />

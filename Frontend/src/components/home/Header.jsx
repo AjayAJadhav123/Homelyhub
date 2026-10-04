@@ -7,6 +7,7 @@ import { logout } from "../../store/User/user-action";
 import toast from "react-hot-toast";
 import { propertyAction } from "../../store/Property/property-slice";
 import { getAllProperties } from "../../store/Property/property-action";
+import NotificationsBell from "./NotificationsBell";
 import "../../css/AiTripPlanner.css";
 
 const Header = () => {
@@ -58,7 +59,9 @@ const Header = () => {
           </Link>
         )}
         {isAuthenticated && user && (
-          <div className="dropdown">
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <NotificationsBell />
+            <div className="dropdown">
             <span
               className="material-symbols-outlined web_logo dropdown-toggle"
               href="#"
@@ -101,10 +104,27 @@ const Header = () => {
                 </Link>
               </li>
               <li>
+                <Link className="dropdown-item" to="/chat">
+                  Messages
+                </Link>
+              </li>
+              <li>
                 <Link className="dropdown-item" to="/user/inquiries">
                   My Inquiries
                 </Link>
               </li>
+              <li>
+                <Link className="dropdown-item" to="/owner/analytics">
+                  Owner Analytics
+                </Link>
+              </li>
+              {user.role === "admin" && (
+                <li>
+                  <Link className="dropdown-item" to="/admin/analytics">
+                    Admin Analytics
+                  </Link>
+                </li>
+              )}
               <li>
                 <button
                   className="dropdown-item"
@@ -115,6 +135,7 @@ const Header = () => {
                 </button>
               </li>
             </ul>
+          </div>
           </div>
         )}
       </nav>

@@ -1,5 +1,6 @@
 import Inquiry from "../Models/inquiryModel.js";
 import { Property } from "../Models/propertyModel.js";
+import { createNotification } from "./notificationController.js";
 
 // Create a new inquiry
 export const createInquiry = async (req, res, next) => {
@@ -54,6 +55,13 @@ export const createInquiry = async (req, res, next) => {
       owner: property.userId,
       message,
     });
+
+    await createNotification(
+      property.userId,
+      "New Inquiry Received",
+      `You received a new inquiry for ${property.propertyName}.`,
+      "NEW_INQUIRY"
+    );
 
     res.status(201).json({
       status: "success",
@@ -170,6 +178,14 @@ export const updateInquiryStatus = async (req, res, next) => {
 
     inquiry.status = status;
     await inquiry.save();
+
+    const prop = await Property.findById(inquiry.property);
+    await createNotification(
+      inquiry.sender,
+      `Inquiry ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      `Your inquiry for ${prop?.propertyName || 'a property'} was ${status}.`,
+      "INQUIRY_UPDATE"
+    );
 
     res.status(200).json({
       status: "success",

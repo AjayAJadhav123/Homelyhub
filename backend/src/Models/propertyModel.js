@@ -28,6 +28,14 @@ const propertySchema = new mongoose.Schema({
         type:Number,
         required:[true,"Please enter maximum number of guests allowed"] 
     },
+    bedrooms: {
+        type: Number,
+        default: 1
+    },
+    isFurnished: {
+        type: Boolean,
+        default: false
+    },
     amenities:[
         {
             name:{
@@ -95,7 +103,10 @@ const propertySchema = new mongoose.Schema({
     },
     slug:String,
     checkInTime:{type:String,default:"11:00"},
-    checkOutTime:{type:String,default:"13:00"}
+    checkOutTime:{type:String,default:"13:00"},
+    averageRating: { type: Number, default: 0 },
+    numberOfReviews: { type: Number, default: 0 },
+    views: { type: Number, default: 0 }
 }, {
     timestamps: true
 });

@@ -13,9 +13,10 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
   const [propertyType, setPropertyType] = useState(
     selectedFilters.propertyType || ""
   );
-
   const [roomType, setRoomType] = useState(selectedFilters.roomType || "");
-
+  const [searchLoc, setSearchLoc] = useState(selectedFilters.search || "");
+  const [bedrooms, setBedrooms] = useState(selectedFilters.bedrooms || "");
+  const [isFurnished, setIsFurnished] = useState(selectedFilters.isFurnished || "");
   const [amenities, setAmenities] = useState(selectedFilters.amenities || []);
   const [sort, setSort] = useState(selectedFilters.sort || "-createdAt");
 
@@ -26,12 +27,18 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
     });
     setPropertyType(selectedFilters.propertyType || "");
     setRoomType(selectedFilters.roomType || "");
+    setSearchLoc(selectedFilters.search || "");
+    setBedrooms(selectedFilters.bedrooms || "");
+    setIsFurnished(selectedFilters.isFurnished || "");
     setAmenities(selectedFilters.amenities || []);
     setSort(selectedFilters.sort || "-createdAt");
   }, [
     selectedFilters.priceRange,
     selectedFilters.propertyType,
     selectedFilters.roomType,
+    selectedFilters.search,
+    selectedFilters.bedrooms,
+    selectedFilters.isFurnished,
     selectedFilters.amenities,
     selectedFilters.sort,
   ]);
@@ -54,8 +61,11 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
     onFilterChange({
       minPrice: priceRange.min,
       maxPrice: priceRange.max,
+      search: searchLoc,
       propertyType: propertyType,
       roomType: roomType,
+      bedrooms: bedrooms,
+      isFurnished: isFurnished,
       amenities: amenities,
       sort: sort,
       page: 1, // Reset page when filters change
@@ -94,13 +104,19 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
     setPriceRange({ min: 600, max: 30000 });
     setPropertyType("");
     setRoomType("");
+    setSearchLoc("");
+    setBedrooms("");
+    setIsFurnished("");
     setAmenities([]);
     setSort("-createdAt");
     onFilterChange({
       minPrice: null,
       maxPrice: null,
+      search: "",
       propertyType: "",
       roomType: "",
+      bedrooms: "",
+      isFurnished: "",
       amenities: [],
       sort: "-createdAt",
       page: 1
@@ -160,6 +176,17 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
           </div>
           
           <div className="filter-section">
+            <label>Location:</label>
+            <input
+              type="text"
+              placeholder="Search destination, city, or property name"
+              value={searchLoc}
+              onChange={(e) => setSearchLoc(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #ccc" }}
+            />
+          </div>
+
+          <div className="filter-section">
             <label>Sort By:</label>
             <select
               value={sort}
@@ -168,6 +195,7 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
               style={{ width: "100%", padding: "8px", borderRadius: "8px" }}
             >
               <option value="-createdAt">Newest First</option>
+              <option value="-averageRating">Top Rated</option>
               <option value="price">Price: Low to High</option>
               <option value="-price">Price: High to Low</option>
             </select>
@@ -205,6 +233,45 @@ const FilterModal = ({ selectedFilters, onFilterChange, onClose }) => {
                   <span>{option.label}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="filter-section">
+            <label>Bedrooms:</label>
+            <div className="icon-box">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <div
+                  key={num}
+                  className={`selectable-box ${
+                    Number(bedrooms) === num ? "selected" : ""
+                  }`}
+                  onClick={() => setBedrooms(Number(bedrooms) === num ? "" : num)}
+                >
+                  <span>{num}{num === 5 ? '+' : ''}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-section">
+            <label>Furnished Status:</label>
+            <div className="icon-box">
+              <div
+                className={`selectable-box ${
+                  isFurnished === 'true' ? "selected" : ""
+                }`}
+                onClick={() => setIsFurnished(isFurnished === 'true' ? "" : "true")}
+              >
+                <span>Furnished</span>
+              </div>
+              <div
+                className={`selectable-box ${
+                  isFurnished === 'false' ? "selected" : ""
+                }`}
+                onClick={() => setIsFurnished(isFurnished === 'false' ? "" : "false")}
+              >
+                <span>Unfurnished</span>
+              </div>
             </div>
           </div>
 
