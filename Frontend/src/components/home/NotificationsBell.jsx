@@ -125,3 +125,4 @@ const NotificationsBell = () => {
 };
 
 export default NotificationsBell;
+
