@@ -12,6 +12,7 @@ const PaymentForm = ({
   maximumGuest,
   propertyId,
   currentBookings,
+  isAvailable,
 }) => {
   const [calculatedPrice, setCalulatedPrice] = useState(0);
   const navigate = useNavigate();
@@ -190,8 +191,11 @@ const PaymentForm = ({
           </div>
         </div>
         <div className="book-place">
-          {!isAuthenticated ? (
-
+          {isAvailable === false ? (
+            <button type="button" disabled style={{ backgroundColor: "gray", cursor: "not-allowed" }}>
+              Booked / Unavailable
+            </button>
+          ) : !isAuthenticated ? (
             <button type="button" onClick={() => navigate("/login")}>
               Login to Book
             </button>

@@ -106,7 +106,8 @@ const propertySchema = new mongoose.Schema({
     checkOutTime:{type:String,default:"13:00"},
     averageRating: { type: Number, default: 0 },
     numberOfReviews: { type: Number, default: 0 },
-    views: { type: Number, default: 0 }
+    views: { type: Number, default: 0 },
+    isAvailable: { type: Boolean, default: true }
 }, {
     timestamps: true
 });

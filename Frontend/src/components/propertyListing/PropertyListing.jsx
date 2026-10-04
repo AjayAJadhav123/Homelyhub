@@ -167,6 +167,7 @@ const PropertyListing = () => {
             address={address}
             maximumGuest={maximumGuest}
             currentBookings={currentBookings}
+            isAvailable={propertydetails.isAvailable}
           />
         </div>
       </div>

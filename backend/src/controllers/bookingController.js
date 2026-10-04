@@ -16,6 +16,7 @@ const createOrder = async (req, res) => {
 
         const property = await Property.findById(propertyId);
         if (!property) return res.status(404).json({ success: false, message: "Property not found" });
+        if (property.isAvailable === false) return res.status(400).json({ success: false, message: "Property is already booked and unavailable" });
 
         const checkIn = new Date(fromDate);
         const checkOut = new Date(toDate);
@@ -107,29 +108,40 @@ const verifyPayement = async (req, res) => {
         const isPaid = response.data.some(payment => payment.payment_status === "SUCCESS");
 
         if (isPaid) {
-        // Atomic update to prevent race conditions with Webhook
-        const updatedBooking = await Booking.findOneAndUpdate(
-            { orderId: order_id, paymentStatus: "PENDING" },
-            { $set: { paid: true, paymentStatus: "SUCCESS" } },
-            { new: true }
-        );
+            // Atomic update to prevent race conditions with Webhook for the SAME booking
+            const updatedBooking = await Booking.findOneAndUpdate(
+                { orderId: order_id, paymentStatus: "PENDING" },
+                { $set: { paid: true, paymentStatus: "SUCCESS" } },
+                { new: true }
+            );
 
-        if (!updatedBooking) {
-            // Either not found or already processed
-            return res.status(200).json({ success: true, message: "Payment already verified", booking: existingBooking });
-        }
+            if (!updatedBooking) {
+                // Either not found or already processed by Webhook
+                return res.status(200).json({ success: true, message: "Payment already verified", booking: existingBooking });
+            }
 
-            // Add to property currentBookings
-            const prop = await Property.findByIdAndUpdate(existingBooking.property, {
-                $push: {
-                    currentBookings: {
-                        bookingId: existingBooking._id,
-                        fromDate: existingBooking.fromDate,
-                        toDate: existingBooking.toDate,
-                        userId: req.user._id
+            // Atomic update to prevent double-booking by DIFFERENT users
+            const prop = await Property.findOneAndUpdate(
+                { _id: existingBooking.property, isAvailable: true },
+                {
+                    $set: { isAvailable: false },
+                    $push: {
+                        currentBookings: {
+                            bookingId: existingBooking._id,
+                            fromDate: existingBooking.fromDate,
+                            toDate: existingBooking.toDate,
+                            userId: req.user._id
+                        }
                     }
-                }
-            });
+                },
+                { new: true }
+            );
+
+            if (!prop) {
+                // Race condition lost to another user's booking! Revert to FAILED
+                await Booking.findByIdAndUpdate(existingBooking._id, { $set: { paymentStatus: "FAILED" } });
+                return res.status(400).json({ success: false, message: "Property was just booked by another user. You will be refunded." });
+            }
 
             await createNotification(
                 req.user._id,
@@ -174,17 +186,26 @@ const cashfreeWebhook = async (req, res) => {
 
                     if (!updatedBooking) return res.status(200).json({ status: "Already Processed" });
 
-                    // Add to property currentBookings
-                    const prop = await Property.findByIdAndUpdate(existingBooking.property, {
-                        $push: {
-                            currentBookings: {
-                                bookingId: existingBooking._id,
-                                fromDate: existingBooking.fromDate,
-                                toDate: existingBooking.toDate,
-                                userId: existingBooking.user
+                    const prop = await Property.findOneAndUpdate(
+                        { _id: existingBooking.property, isAvailable: true },
+                        {
+                            $set: { isAvailable: false },
+                            $push: {
+                                currentBookings: {
+                                    bookingId: existingBooking._id,
+                                    fromDate: existingBooking.fromDate,
+                                    toDate: existingBooking.toDate,
+                                    userId: existingBooking.user
+                                }
                             }
-                        }
-                    });
+                        },
+                        { new: true }
+                    );
+
+                    if (!prop) {
+                        await Booking.findByIdAndUpdate(existingBooking._id, { $set: { paymentStatus: "FAILED" } });
+                        return res.status(200).json({ status: "Double Booking Prevented" });
+                    }
 
                     await createNotification(
                         existingBooking.user,
@@ -220,7 +241,7 @@ const cashfreeWebhook = async (req, res) => {
 
 const getUserBookings = async (req,res)=>{
   try {
-    const bookings = await Booking.find({user:req.user._id});
+    const bookings = await Booking.find({user:req.user._id, paymentStatus: "SUCCESS"}).populate("property");
     res.status(200).json({
         status:"success",
         bookings
@@ -238,7 +259,7 @@ const getUserBookings = async (req,res)=>{
 
 const getBookingDetails = async (req,res)=>{
     try{
-        const bookings = await Booking.findById(req.params.bookingId);
+        const bookings = await Booking.findById(req.params.bookingId).populate("property");
         res.status(200).json({
         status:"success",
          bookings
