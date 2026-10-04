@@ -55,7 +55,9 @@ const createOrder = async (req, res) => {
 
         // Cashfree production strictly requires HTTPS URLs
         if (process.env.CASHFREE_ENV === "PRODUCTION" || process.env.CASHFREE_ENV === "production") {
-            returnUrl = returnUrl.replace("http://", "https://");
+            // Force the stable production domain for Cashfree return_url
+            const stableFrontendUrl = "https://homelyhub-c4md.vercel.app";
+            returnUrl = `${stableFrontendUrl}/payment-status?order_id=${order_id}`;
             notifyUrl = notifyUrl.replace("http://", "https://");
         }
 
