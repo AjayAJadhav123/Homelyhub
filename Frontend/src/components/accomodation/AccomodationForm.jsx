@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ImagesUploading from "./ImagesUploading";
-import { getAiDescription } from "../../ai/aiDescription";
 import { useForm } from "@tanstack/react-form";
 import { AddressField } from "./AddressField";
 import AmenitiesField from "./AmenitiesField";
@@ -30,7 +29,6 @@ const AccomodationForm = ({ isEdit }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { loading: storeLoading } = useSelector((state) => state.accomodation);
-  const [aiLoading, setAiLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   
   const loading = storeLoading || fetchLoading;
@@ -142,25 +140,7 @@ const AccomodationForm = ({ isEdit }) => {
   }
 });
 
-  const handleAiDescription = async (field) => {
-    const values = form.state.values;
 
-    if (!values.name) {
-      toast.error("Please add a title first");
-      return;
-    }
-
-    setAiLoading(true);
-    try {
-      const description = await getAiDescription(values);
-      field.handleChange(description);
-      toast.success("Description added");
-    } catch (error) {
-      toast.error("Could not generate a description");
-      console.error(error);
-    }
-    setAiLoading(false);
-  };
 
   React.useEffect(() => {
     if (isEdit && id) {
@@ -305,23 +285,11 @@ const AccomodationForm = ({ isEdit }) => {
                   <span className="accf-hint">
                     Tell guests what makes your place special
                   </span>
-
-                  <button
-                    type="button"
-                    className="accf-ai"
-                    disabled={aiLoading}
-                    onClick={() => handleAiDescription(field)}
-                  >
-                    <span className="material-symbols-outlined">
-                      auto_awesome
-                    </span>
-                    {aiLoading ? "Writing..." : "Write with AI"}
-                  </button>
                 </div>
                 <textarea
                   className="accf-input accf-textarea"
                   rows="5"
-                  placeholder="Write a few lines, or let AI do it for you"
+                  placeholder="Write a few lines here..."
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
