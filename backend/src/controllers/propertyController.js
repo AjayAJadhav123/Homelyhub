@@ -162,15 +162,20 @@ const updateProperty = async (req, res) => {
 
     const {
       propertyName, description, propertyType, roomType, extraInfo,
-      address, amenities, checkInTime, checkOutTime, maximumGuest, price
+      address, amenities, checkInTime, checkOutTime, maximumGuest, price, images
     } = req.body;
+
+    const updateData = {
+        propertyName, description, propertyType, roomType, extraInfo,
+        address, amenities, checkInTime, checkOutTime, maximumGuest, price
+    };
+    if (images && Array.isArray(images) && images.length >= 6) {
+        updateData.images = images;
+    }
 
     const updatedProperty = await Property.findByIdAndUpdate(
       req.params.id,
-      {
-        propertyName, description, propertyType, roomType, extraInfo,
-        address, amenities, checkInTime, checkOutTime, maximumGuest, price
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
