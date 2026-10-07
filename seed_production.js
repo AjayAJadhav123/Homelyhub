@@ -237,7 +237,7 @@ async function main() {
         });
         const loginData = await loginRes.json();
         
-        if (loginRes.ok && loginData.status === "success") {
+        if (loginRes.ok && loginData.status && loginData.status.toLowerCase() === "success") {
             const setCookieHeader = loginRes.headers.get('set-cookie');
             if (setCookieHeader) {
                 // simple parsing for the JWT cookie
@@ -245,6 +245,11 @@ async function main() {
             }
             console.log("✅ Authenticated successfully.");
         } else {
+            console.log("--- DIAGNOSTIC LOG ---");
+            console.log("HTTP Status:", loginRes.status);
+            console.log("Status Text:", loginRes.statusText);
+            console.log("Response Body:", JSON.stringify({ ...loginData, user: undefined, token: undefined }));
+            console.log("----------------------");
             console.error("❌ Authentication failed:", loginData.message || "Unknown error");
             return;
         }
