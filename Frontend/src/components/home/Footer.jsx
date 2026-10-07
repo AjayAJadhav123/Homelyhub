@@ -96,7 +96,7 @@ const Footer = () => {
           <ul className="hh-footer__list hh-footer__list--contact">
             <li>
               <span className="material-symbols-outlined hh-footer__contact-icon">location_on</span>
-              Chhatrapati Sambhajinagar, Vaijapur, India
+              Chhatrapati Sambhajinagar, India
             </li>
             <li>
               <span className="material-symbols-outlined hh-footer__contact-icon">mail</span>
@@ -118,7 +118,7 @@ const Footer = () => {
       {/* Bottom bar */}
       <div className="hh-footer__bottom">
         <p>© {new Date().getFullYear()} HomelyHub, Inc. All rights reserved.</p>
-        <p className="hh-footer__locale">🇮🇳 English (IN) &nbsp;|&nbsp; ₹ INR</p>
+
       </div>
     </footer>
   );
