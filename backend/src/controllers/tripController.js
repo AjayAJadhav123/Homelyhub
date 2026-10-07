@@ -8,8 +8,17 @@ export const generateTripPlan = async (req, res) => {
     // 1. Receive user's information
     const { destination, budget, days, people, interests } = req.body;
 
+    console.log("Trip plan request received:", {
+      destination,
+      budget,
+      days,
+      people,
+      interests,
+    });
+
     // 2. Validate required information
     if (!destination || !budget || !days || !people || !interests) {
+      console.log("Processing stage failed: Validation - Missing fields");
       return res.status(400).json({
         success: false,
         message:
@@ -18,6 +27,7 @@ export const generateTripPlan = async (req, res) => {
     }
 
     if (budget <= 0 || days <= 0 || people <= 0) {
+      console.log("Processing stage failed: Validation - Invalid numeric values");
       return res.status(400).json({
         success: false,
         message: "Budget, days and number of people must be greater than 0",
@@ -67,7 +77,15 @@ export const generateTripPlan = async (req, res) => {
       data: { aiTripPlan, properties, budgetPerNight },
     });
   } catch (error) {
+    console.log("Processing stage failed: AI API Call or DB Search");
     console.error("Trip planning error:", error);
+
+    if (error.message && error.message.includes("AI returned invalid JSON")) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to parse AI response. The model may have returned invalid JSON format.",
+      });
+    }
 
     // Groq is not configured (dummy / missing key)
     if (error.message && error.message.includes("not configured")) {

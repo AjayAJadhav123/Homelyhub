@@ -34,7 +34,6 @@ const planTrip = async (trip) => {
   const completion = await client.chat.completions.create({
     model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
     max_tokens: 2000,
-    response_format: { type: "json_object" },
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: tripInfo },
