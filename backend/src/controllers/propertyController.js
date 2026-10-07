@@ -165,19 +165,26 @@ const updateProperty = async (req, res) => {
       address, amenities, checkInTime, checkOutTime, maximumGuest, price, images
     } = req.body;
 
-    const updateData = {
-        propertyName, description, propertyType, roomType, extraInfo,
-        address, amenities, checkInTime, checkOutTime, maximumGuest, price
-    };
+    // Use find + mutate + save so that array-level validators (images) fire correctly
+    // findByIdAndUpdate skips custom array validators for subdocuments
+    const propertyToUpdate = await Property.findById(req.params.id);
+
+    if (propertyName !== undefined) propertyToUpdate.propertyName = propertyName;
+    if (description !== undefined) propertyToUpdate.description = description;
+    if (propertyType !== undefined) propertyToUpdate.propertyType = propertyType;
+    if (roomType !== undefined) propertyToUpdate.roomType = roomType;
+    if (extraInfo !== undefined) propertyToUpdate.extraInfo = extraInfo;
+    if (address !== undefined) propertyToUpdate.address = address;
+    if (amenities !== undefined) propertyToUpdate.amenities = amenities;
+    if (checkInTime !== undefined) propertyToUpdate.checkInTime = checkInTime;
+    if (checkOutTime !== undefined) propertyToUpdate.checkOutTime = checkOutTime;
+    if (maximumGuest !== undefined) propertyToUpdate.maximumGuest = maximumGuest;
+    if (price !== undefined) propertyToUpdate.price = price;
     if (images && Array.isArray(images) && images.length >= 6) {
-        updateData.images = images;
+        propertyToUpdate.images = images;
     }
 
-    const updatedProperty = await Property.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const updatedProperty = await propertyToUpdate.save({ validateBeforeSave: true });
 
     // PRICE DROP DETECTION
     if (price && Number(price) < property.price) {
