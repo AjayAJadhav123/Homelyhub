@@ -5,7 +5,19 @@ import { axiosInstance } from "../../../utils/axios";
 import LoadingSpinner from "../../LoadingSpinner";
 import "./Chat.css";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace("/api", "") : "http://localhost:3000";
+const getSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  if (apiUrl) {
+    try {
+      return new URL(apiUrl).origin;
+    } catch (e) {
+      return apiUrl.replace(/\/api.*/, "");
+    }
+  }
+  return "http://localhost:3000";
+};
+
+const SOCKET_URL = getSocketUrl();
 
 const Chat = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -19,6 +31,11 @@ const Chat = () => {
   const [loading, setLoading] = useState(true);
   
   const messagesEndRef = useRef(null);
+  const activeConvRef = useRef(activeConv);
+  
+  useEffect(() => {
+    activeConvRef.current = activeConv;
+  }, [activeConv]);
 
   // Initialize Socket & Fetch Conversations
   useEffect(() => {
@@ -40,7 +57,7 @@ const Chat = () => {
 
     newSocket.on("receive_message", (message) => {
       // If we are currently viewing this conversation, append the message
-      if (activeConv && message.conversation === activeConv._id) {
+      if (activeConvRef.current && message.conversation === activeConvRef.current._id) {
         setMessages((prev) => [...prev, message]);
       }
       // Also update the conversation list snippet
@@ -78,7 +95,7 @@ const Chat = () => {
     fetchConversations();
 
     return () => newSocket.disconnect();
-  }, [isAuthenticated, user, activeConv]);
+  }, [isAuthenticated, user]); // removed activeConv to prevent reconnect loop
 
   // Fetch messages when active conversation changes
   useEffect(() => {
@@ -94,7 +111,7 @@ const Chat = () => {
     };
 
     fetchMessages();
-  }, [activeConv]);
+  }, [activeConv, socket]);
 
   // Scroll to bottom
   useEffect(() => {
