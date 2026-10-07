@@ -4,6 +4,8 @@ import { axiosInstance } from "../../utils/axios";
 import toast from "react-hot-toast";
 import "../../css/Payment.css";
 
+import { useSelector } from "react-redux";
+
 /**
  * PaymentStatus
  * Cashfree redirects here after payment (redirect checkout mode).
@@ -14,15 +16,28 @@ const PaymentStatus = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying"); // verifying | success | failed
+  const [hasVerified, setHasVerified] = useState(false);
+  const { isAuthenticated, loading } = useSelector((state) => state.user);
 
   useEffect(() => {
     const orderId = searchParams.get("order_id");
+    
+    // Wait for auth initialization
+    if (loading) return;
+    
+    if (!isAuthenticated) {
+        navigate("/login");
+        return;
+    }
 
     if (!orderId) {
       setStatus("failed");
       toast.error("Order ID missing from return URL.");
       return;
     }
+    
+    // Prevent double verification
+    if (hasVerified) return;
 
     const verify = async () => {
       try {
@@ -46,11 +61,17 @@ const PaymentStatus = () => {
           err.message ||
           "Payment verification failed.";
         toast.error(msg);
+        
+        // If unauthorized, the session is dead or missing
+        if (err.response?.status === 401 || err.response?.status === 403) {
+           navigate("/login");
+        }
       }
     };
 
+    setHasVerified(true);
     verify();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, hasVerified, loading, isAuthenticated]);
 
   return (
     <div className="payment-container">

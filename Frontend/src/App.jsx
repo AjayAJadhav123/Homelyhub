@@ -113,7 +113,7 @@ function App() {
 
                   <Route
                     path="payment-status"
-                    element={user ? <PaymentStatus /> : <Navigate to="/login" />}
+                    element={<PaymentStatus />}
                   />
                   
                   <Route
