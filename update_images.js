@@ -121,7 +121,7 @@ async function main() {
         const newImages = mapUrlsToImageObjects(PROPERTY_IMAGES[propName]);
 
         try {
-            const updateRes = await fetch(`${API_BASE_URL}/user/accommodation/${prop._id}`, {
+            const updateRes = await fetch(`${API_BASE_URL}/user/accommodation/${prop._id}/force-images`, {
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
