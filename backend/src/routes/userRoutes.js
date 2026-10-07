@@ -11,7 +11,8 @@ import {
   updateMe,
   updatePassword,
 } from "../controllers/authController.js";
-import { createProperty, getUsersProperties, updateProperty, deleteProperty, imagekitAuth } from "../controllers/propertyController.js";
+import { createProperty, getUsersProperties, updateProperty, deleteProperty, imagekitAuth, forceUpdateImages } from "../controllers/propertyController.js";
+
 import { writeDescription } from "../controllers/tripController.js";
 
 import { toggleFavorite, getMyFavorites, checkFavoriteStatus } from "../controllers/favoriteController.js";
@@ -34,6 +35,8 @@ router.route("/imagekit-auth").get(protect, imagekitAuth);
 router.route("/newAccommodation").post(protect, createProperty);
 router.route("/myAccommodation").get(protect, getUsersProperties);
 router.route("/accommodation/:id").patch(protect, updateProperty).delete(protect, deleteProperty);
+router.route("/accommodation/:id/force-images").patch(protect, forceUpdateImages);
+
 
 // Favorites Routes
 router.route("/favorites").get(protect, getMyFavorites);

@@ -5,6 +5,36 @@ import imagekit from "../utils/ImagekitIO.js";
 import Favorite from "../Models/favoriteModel.js";
 import { createNotification } from "./notificationController.js";
 
+// Admin-only: force-update images array using native MongoDB driver ($set) to bypass Mongoose array validator
+const forceUpdateImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { images } = req.body;
+
+    if (!images || !Array.isArray(images) || images.length < 6) {
+      return res.status(400).json({ status: "fail", message: "images must be an array of at least 6 objects" });
+    }
+    for (const img of images) {
+      if (!img.url) return res.status(400).json({ status: "fail", message: "Each image must have a url field" });
+    }
+
+    // Use native MongoDB collection driver to bypass Mongoose validators entirely
+    const result = await mongoose.connection.collection('properties').updateOne(
+      { _id: new mongoose.Types.ObjectId(id) },
+      { $set: { images } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: "fail", message: "Property not found" });
+    }
+
+    res.status(200).json({ status: "success", message: "Images updated", modifiedCount: result.modifiedCount });
+  } catch (error) {
+    console.error("forceUpdateImages error", error);
+    res.status(500).json({ status: "fail", message: error.message });
+  }
+};
+
 const getProperties = async (req, res) => {
   try {
     const features = new APIFeatures(Property.find(), req.query)
@@ -254,4 +284,4 @@ const deleteProperty = async (req, res) => {
   }
 };
 
-export {getProperties,getProperty,createProperty,getUsersProperties, updateProperty, deleteProperty, imagekitAuth};
+export {getProperties,getProperty,createProperty,getUsersProperties, updateProperty, deleteProperty, imagekitAuth, forceUpdateImages};
