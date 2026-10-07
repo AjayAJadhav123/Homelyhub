@@ -4,7 +4,12 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "seed": "node src/seed/properties.js",
+    "update-images": "node src/seed/updateImages.js",
+    "update-demo": "node update-demo-properties.js",
+    "verify": "node verify-properties.js",
+    "find-old-images": "node find-old-images.js"
   },
   "keywords": [],
   "author": "",

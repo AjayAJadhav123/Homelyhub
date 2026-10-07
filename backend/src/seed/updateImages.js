@@ -27,7 +27,12 @@ const runUpdate = async () => {
       console.error("❌ MONGO_URI missing");
       process.exit(1);
     }
-    await mongoose.connect(process.env.MONGO_URI);
+    console.log("🔄 Connecting to MongoDB...");
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    console.log("✅ Connected to MongoDB");
     
     // Find properties that have 'dummy_image_0'
     const dummyProps = await Property.find({ "images.public_id": "dummy_image_0" });

@@ -1,0 +1,125 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🔍 HOME PAGE IMAGE ISSUE - DIAGNOSIS                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📊 CURRENT SITUATION:
+   ✅ My Accommodations: Shows correct images (e.g., Ajayhome)
+   ❌ Home page: Shows old Oracle Cloud screenshot images for Demo properties
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 ROOT CAUSE ANALYSIS:
+
+Both pages use SAME backend API → SAME MongoDB database → SAME Property model
+
+Home Page API:        /api/v1/rent/listing/
+My Accommodations:    /api/v1/rent/user/myAccommodation
+                               ↓
+                      Both query Property.find()
+                               ↓
+                      Same MongoDB collection
+
+CONCLUSION: Issue is either:
+   A) Some properties in DB have old ImageKit URLs (backend issue)
+   B) Browser/Vercel cache serving old local images (frontend issue)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 QUICK DIAGNOSTIC (Run in Browser Console):
+
+fetch('https://homelyhub-zspm.onrender.com/api/v1/rent/listing/')
+  .then(r=>r.json())
+  .then(d=>{
+    const old=d.data.filter(p=>p.images?.[0]?.url?.includes('ik.imagekit.io')).length;
+    const unsplash=d.data.filter(p=>p.images?.[0]?.url?.includes('unsplash')).length;
+    console.log(`API: ${unsplash} Unsplash / ${old} Old ImageKit`);
+    console.log(old>0?'❌ Backend Issue':'✅ API Good → Cache Issue');
+  });
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 IF BACKEND ISSUE (API returns old ImageKit URLs):
+
+1. SSH into Render Shell
+2. Run: npm run find-old-images
+   → Shows which properties have old images
+3. Run: npm run update-demo
+   → Updates ALL properties with old ImageKit URLs
+4. Run: npm run verify
+   → Confirms all updated
+5. Clear frontend cache
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 IF FRONTEND CACHE ISSUE (API returns Unsplash, browser shows old):
+
+1. Hard refresh browser:
+   • Windows: Ctrl + Shift + R
+   • Mac: Cmd + Shift + R
+
+2. Try incognito mode
+
+3. Clear Vercel cache:
+   • Vercel Dashboard → Deployments
+   • Latest deployment → "..." menu
+   • "Redeploy" → Check "Clear Build Cache"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 FILES CREATED:
+
+Diagnostic Scripts (Run on Render):
+   • backend/find-old-images.js        → Find properties with old images
+   • backend/verify-properties.js      → Verify all updated correctly
+
+Update Scripts (Run on Render if needed):
+   • backend/update-demo-properties.js → Update Demo/old properties
+   • backend/src/seed/updateImages.js  → Update seeded properties
+
+Documentation:
+   • DIAGNOSIS_REPORT.md     → Technical analysis
+   • ACTION_PLAN.md          → Step-by-step guide
+   • BROWSER_TEST.md         → Browser console tests
+   • README_DIAGNOSIS.md     → Complete summary
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 NEXT IMMEDIATE ACTION:
+
+1. Run the "Quick Diagnostic" above in browser console
+2. Note if it says "Backend Issue" or "Cache Issue"
+3. Follow the appropriate section above
+4. Report back with results
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  IMPORTANT RULES:
+
+DO NOT:
+   ❌ Run update scripts without diagnosing first
+   ❌ Modify MongoDB directly
+   ❌ Create/delete properties
+   ❌ Touch payment/auth code
+
+DO:
+   ✅ Run diagnostic first
+   ✅ Verify API response
+   ✅ Clear caches after backend updates
+   ✅ Test in incognito mode
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ SUCCESS CRITERIA:
+
+After fixing:
+   ✓ API returns Unsplash URLs for all properties
+   ✓ Home page displays realistic home photos
+   ✓ No Oracle Cloud screenshots visible
+   ✓ Each property has 6 distinct images
+   ✓ No duplicate properties created
+
+Verify with: npm run verify (on Render)
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  For detailed instructions, see: ACTION_PLAN.md or README_DIAGNOSIS.md       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
