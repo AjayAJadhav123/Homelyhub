@@ -98,9 +98,9 @@ const MyBookings = () => {
                   <img
                     className="booking-img"
                     src={
-                      booking?.property.images &&
-                      booking?.property.images.length > 0
-                        ? booking?.property.images[0].url
+                      booking?.property?.images &&
+                      booking?.property?.images.length > 0
+                        ? booking?.property?.images[0].url
                         : undefined
                     }
                     alt="bookings"
@@ -108,7 +108,7 @@ const MyBookings = () => {
                 </div>
                 <div className="booking-information col-lg-9 col-md-9">
                   <h6 className="hotel-name">
-                    {booking?.property.propertyName}
+                    {booking?.property?.propertyName || "Property Unavailable"}
                   </h6>
                   <div className="stay-information">
                     <span className="info">

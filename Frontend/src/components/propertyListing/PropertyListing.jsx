@@ -14,10 +14,7 @@ import InquiryModal from "./InquiryModal";
 import PropertyReviews from "./PropertyReviews";
 import { axiosInstance } from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
-import {
-  STATIC_PROPERTIES,
-  STATIC_PROPERTY_DETAILS,
-} from "../../data/staticData";
+
 
 const PropertyListing = () => {
   const { id } = useParams();

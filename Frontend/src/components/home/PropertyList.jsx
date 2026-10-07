@@ -2,10 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import "../../css/Home.css";
-import {
-  STATIC_PROPERTIES,
-  STATIC_TOTAL_PROPERTIES,
-} from "../../data/staticData";
+
 import {useDispatch,useSelector} from "react-redux"
 import {propertyAction} from "../../store/Property/property-slice"
 import {getAllProperties} from "../../store/Property/property-action"

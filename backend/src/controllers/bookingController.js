@@ -117,12 +117,18 @@ const verifyPayement = async (req, res) => {
 
             if (!updatedBooking) {
                 // Either not found or already processed by Webhook
-                return res.status(200).json({ success: true, message: "Payment already verified", booking: existingBooking });
+                const actualBooking = await Booking.findById(existingBooking._id);
+                if (actualBooking && actualBooking.paymentStatus === "SUCCESS") {
+                    return res.status(200).json({ success: true, message: "Payment already verified", booking: actualBooking });
+                } else {
+                    return res.status(400).json({ success: false, message: "Payment verification failed or race condition lost." });
+                }
             }
 
             // Atomic update to prevent double-booking by DIFFERENT users
+            const propertyId = existingBooking.property?._id || existingBooking.property;
             const prop = await Property.findOneAndUpdate(
-                { _id: existingBooking.property, isAvailable: true },
+                { _id: propertyId, isAvailable: { $ne: false } },
                 {
                     $set: { isAvailable: false },
                     $push: {
@@ -186,8 +192,9 @@ const cashfreeWebhook = async (req, res) => {
 
                     if (!updatedBooking) return res.status(200).json({ status: "Already Processed" });
 
+                    const propertyId = existingBooking.property?._id || existingBooking.property;
                     const prop = await Property.findOneAndUpdate(
-                        { _id: existingBooking.property, isAvailable: true },
+                        { _id: propertyId, isAvailable: { $ne: false } },
                         {
                             $set: { isAvailable: false },
                             $push: {
