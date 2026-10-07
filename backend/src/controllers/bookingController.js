@@ -97,7 +97,8 @@ const verifyPayement = async (req, res) => {
 
         const existingBooking = await Booking.findOne({ orderId: order_id });
         if (!existingBooking) return res.status(404).json({ success: false, message: "Booking not found" });
-        if (existingBooking.user.toString() !== req.user._id.toString()) return res.status(403).json({ success: false, message: "Unauthorized" });
+        const existingUserId = existingBooking.user?._id || existingBooking.user;
+        if (existingUserId.toString() !== req.user._id.toString()) return res.status(403).json({ success: false, message: "Unauthorized" });
 
         // If already success, return immediately (Idempotency)
         if (existingBooking.paymentStatus === "SUCCESS") {
